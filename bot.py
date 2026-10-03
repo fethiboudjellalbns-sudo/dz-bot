@@ -1,6 +1,14 @@
+from flask import Flask
+import threading
+import os
 import telebot
 from telebot import types
-import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
 
 TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
@@ -20,7 +28,7 @@ def calc_moy(message):
     try:
         notes = [float(x) for x in message.text.split()]
         moy = sum(notes) / len(notes)
-        bot.send_message(message.chat.id, f"معدلك هو: {moy:.2f} ✅")
+        bot.send_message(message.chat.id, f"معدلك هو : {moy:.2f} ✅")
     except:
         bot.send_message(message.chat.id, "خطأ ❌ ابعت هكا: 12 14 13")
 
@@ -28,5 +36,12 @@ def calc_moy(message):
 def all_msg(message):
     bot.send_message(message.chat.id, "اكتب /start")
 
-print("Bot running...")
-bot.infinity_polling()
+def run_bot():
+    print("Bot running...")
+    bot.infinity_polling()
+
+threading.Thread(target=run_bot).start()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
