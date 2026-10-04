@@ -1,3 +1,4 @@
+
 import os
 import telebot
 from flask import Flask
@@ -8,7 +9,6 @@ TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# مسح الـ Webhook باش ما يصيرش Conflict 409
 try:
     bot.remove_webhook()
     time.sleep(1)
@@ -26,13 +26,13 @@ def start(msg):
 def handle(msg):
     t = msg.text
     if "معدل" in t:
-        bot.send_message(msg.chat.id, "ابعثلي العلامات: مثال\n16 15 14 13")
+        bot.send_message(msg.chat.id, "ابعثلي علاماتك نحسبلك")
     elif "بحوث" in t:
-        bot.send_message(msg.chat.id, "📚 بنك البحوث قريبا...")
+        bot.send_message(msg.chat.id, "📚 بنك البحوث قريبا")
     elif "الوقت" in t:
-        bot.send_message(msg.chat.id, "⏰ 25 د قراية / 5 د راحة")
+        bot.send_message(msg.chat.id, "⏰ 25د قراية / 5د راحة")
     elif "نصائح" in t:
-        bot.send_message(msg.chat.id, "💡 اقرا كل يوم ولو شوية!")
+        bot.send_message(msg.chat.id, "💡 اقرا كل يوم!")
     else:
         bot.send_message(msg.chat.id, "اختار من القائمة 👇")
 
