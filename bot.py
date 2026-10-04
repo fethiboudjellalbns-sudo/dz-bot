@@ -89,7 +89,7 @@ try:
 except:
     pass
 
-NASAIH = ["اقرا 30د", "حدد هدفك", "صامت", "التركيز", "اشرح الدرس"]
+NASAIH = ["tip1", "tip2", "tip3", "tip4", "tip5"]
 
 @bot.message_handler(commands=['start'])
 def start(m):
