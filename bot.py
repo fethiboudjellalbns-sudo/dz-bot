@@ -1,24 +1,57 @@
-import os, telebot, threading, time, random
+import os
+import threading
+import sqlite3
+import time
 from flask import Flask
+import telebot
 
 TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
-state = {}
 
-try:
-    bot.remove_webhook()
-    time.sleep(1)
-except:
-    pass
+@app.route('/')
+def home():
+    return "Bot is alive! ⛏️"
 
-NASAIH = ["اقرا كل يوم","نظم وقتك","ركز على هدفك","النجاح بالاستمرارية"]
+conn = sqlite3.connect('miners.db', check_same_thread=False)
+c = conn.cursor()
+c.execute('CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, balance INTEGER, last_mine REAL, referrals INTEGER)')
+conn.commit()
 
-MOLAKHASAT = {
-"تاريخ": "📚 تاريخ - الثورة الجزائرية (1954-1962):\n\n1- اسباب الثورة:\n- الاستعمار الفرنسي منذ 1830\n- الظلم والقهر\n- نهب الثروات\n- الحرمان من التعليم\n\n2- التحضير:\n- اجتماع مجموعة 22\n- اجتماع لجنة 6\n- تفجير الثورة 1 نوفمبر 1954\n\n3- مراحل الثورة:\n1954-1956: الانطلاقة\n1956-1958: التنظيم (مؤتمر الصومام)\n1958-1960: حرب شاملة\n1960-1962: المفاوضات والاستقلال\n\n4- النتائج:\n- استقلال الجزائر 5 جويلية 1962\n- مليون ونصف شهيد\n- استرجاع السيادة",
+def get_user(uid):
+    c.execute("SELECT * FROM users WHERE user_id=?", (uid,))
+    return c.fetchone()
 
-"جغرافيا": "🌍 جغرافيا - الاقتصاد الجزائري:\n\n1- الموارد:\n- البترول والغاز (حاسي مسعود)\n- الحديد والفوسفات\n- الفلاحة: قمح، زيتون\n\n2- المشاكل:\n- الاعتماد على المحروقات\n- البطالة\n- التصحر\n\n3- الحلول:\n- تنويع الاقتصاد\n- الاستثمار في الفلاحة\n- السياحة",
+@bot.message_handler(commands=['start'])
+def start(m):
+    uid = m.from_user.id
+    name = m.from_user.username or m.from_user.first_name
+    if not get_user(uid):
+        c.execute("INSERT INTO users VALUES (?,?,?,?,?)", (uid, name, 100, 0, 0))
+        conn.commit()
+    bot.send_message(m.chat.id, f"أهلا {name} في منجم HAMMAMET ⛏️\nهدية: 100 عملة\n/mine - عدّن كل 6 سوايع\n/balance - شوف رصيدك")
 
-"رياضيات": "📐 رياضيات - باك علوم:\n\n1- الدوال:\n- النهايات: lim f(x)\n- الاشتقاق: f'(x)=0 نقطة حرجة\n- دراسة التغيرات\n\n2- المتتاليات:\n- حسابية: Un+1=Un+r\n- هندسية: Un+1=Un*q\n\n3- الاحتمالات:\n- P(A)=عدد الحالات/العدد الكلي\n- الاحتمال الشرطي\n\nنصيحة: حل 5 تمارين يوميا!",
+@bot.message_handler(commands=['mine'])
+def mine(m):
+    u = get_user(m.from_user.id)
+    if not u: return
+    now = time.time()
+    if now - u[3] < 21600:
+        bot.send_message(m.chat.id, f"⏳ مازال {(21600 - (now - u[3]))/60:.0f} دقيقة"); return
+    c.execute("UPDATE users SET balance=balance+50, last_mine=? WHERE user_id=?", (now, m.from_user.id))
+    conn.commit()
+    bot.send_message(m.chat.id, "✅ عدنت 50 HAMMAMET!")
 
-"فيزياء": "⚛️ فيزياء - باك:\
+@bot.message_handler(commands=['balance'])
+def bal(m):
+    u = get_user(m.from_user.id)
+    bot.send_message(m.chat.id, f"💼 رصيدك: {u[2]} HAMMAMET")
+
+def run_bot():
+    try: bot.remove_webhook()
+    except: pass
+    bot.infinity_polling()
+
+threading.Thread(target=run_bot).start()
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
