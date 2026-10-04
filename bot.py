@@ -1,14 +1,10 @@
-import os
-import telebot
-import threading
-import time
-import random
+import os, telebot, threading, time, random
 from flask import Flask
 
 TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
-user_state = {}
+state = {}
 
 try:
     bot.remove_webhook()
@@ -16,37 +12,48 @@ try:
 except:
     pass
 
-NASAIH = ["a", "b", "c", "d", "e"]
+NASAIH = [
+"اقرا كل يوم",
+"نظم وقتك",
+"ركز على هدفك",
+"لا تقارن نفسك",
+"الاستمرارية مفتاح النجاح",
+"نم باكرا",
+"راجع دروسك"
+]
 
 @bot.message_handler(commands=['start'])
 def start(m):
-    kb = telebot.types.ReplyKeyboardMarkup(True)
-    kb.add("moyenne")
-    kb.add("nasiha")
-    bot.send_message(m.chat.id, "Bot V2 Ready", reply_markup=kb)
+    kb = telebot.types.ReplyKeyboardMarkup(True, True)
+    kb.add("moyenne", "nasiha")
+    bot.send_message(m.chat.id, "مرحبا فتحي! البوت يخدم ✅\nاختر:", reply_markup=kb)
+
+@bot.message_handler(func=lambda m: m.text == "moyenne")
+def ask_moy(m):
+    state[m.chat.id] = "wait"
+    bot.send_message(m.chat.id, "ابعثلي نقاطك هكا: 15 14 16")
+
+@bot.message_handler(func=lambda m: m.text == "nasiha")
+def send_n(m):
+    bot.send_message(m.chat.id, "💡 " + random.choice(NASAIH))
 
 @bot.message_handler(func=lambda m: True)
 def all_msg(m):
     cid = m.chat.id
-    txt = m.text
-    if "moyenne" in txt:
-        user_state[cid] = "wait"
-        bot.send_message(cid, "send: 15 14 12")
-        return
-    if user_state.get(cid) == "wait":
+    if state.get(cid) == "wait":
         try:
-            nums = [float(x) for x in txt.split()]
+            nums = [float(x) for x in m.text.split()]
             moy = sum(nums) / len(nums)
-            bot.send_message(cid, f"moy {moy:.2f}")
-            user_state.pop(cid)
+            bot.send_message(cid, f"معدلك: {moy:.2f}")
+            state.pop(cid)
         except:
-            bot.send_message(cid, "numbers only")
+            bot.send_message(cid, "ارقام فقط: 15 14 12")
         return
-    bot.send_message(cid, random.choice(NASAIH))
+    bot.send_message(cid, "دوس /start")
 
 @app.route('/')
 def home():
-    return "Bot V2 Live!"
+    return "Live!"
 
 def run_bot():
     bot.remove_webhook()
