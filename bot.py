@@ -50,7 +50,7 @@ def handle(msg):
             bot.send_message(chat_id, res, parse_mode="Markdown")
             del user_state[chat_id]
         except:
-            bot.send_message(chat_id, "❌ خطأ! ابعث أرقام فقط مفصولة بفراغ\nمثال: 15 14 12")
+            bot.send_message(chat_id, " خطأ! ابعث أرقام فقط مفصولة بفراغ\nمثال: 15 14 12")
         return
 
     if "بحوث" in t:
