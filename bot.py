@@ -1,47 +1,53 @@
-from flask import Flask
-import threading
 import os
+from flask import Flask, request
 import telebot
 from telebot import types
-
 app = Flask(__name__)
+TOKEN = os.environ.get("BOT_TOKEN")
+bot = telebot.TeleBot(TOKEN)
+
+def main_keyboard():
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    markup.add("🧮 حساب المعدل", "📚 بنك البحوث", "📅 تنظيم الوقت", "💡 نصائح للتفوق")
+    return markup
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, "🇩🇿 أهلا بيك في بوت الطالب الجزائري 🤖\n\nاختار من القائمة لتحت 👇", reply_markup=main_keyboard())
+
+@bot.message_handler(func=lambda m: "حساب المعدل" in m.text)
+def mo3adal(message):
+    bot.send_message(message.chat.id, "📊 ابعتلي نقاطك هكا: 16 12 15 14 وانا نحسبلك المعدل")
+
+@bot.message_handler(func=lambda m: "بنك البحوث" in m.text)
+def bo7outh(message):
+    bot.send_message(message.chat.id, "📚 بنك البحوث:\n\n1. بحث الذكاء الاصطناعي\n2. بحث التنمية المستدامة\n3. بحث التسويق الرقمي\n\nاكتب اسم البحث")
+
+@bot.message_handler(func=lambda m: "تنظيم الوقت" in m.text)
+def wa9t(message):
+    bot.send_message(message.chat.id, "📅 خطة المراجعة:\nصباح: حفظ\nمساء: فهم\nليل: مراجعة خفيفة")
+
+@bot.message_handler(func=lambda m: "نصائح" in m.text)
+def nasa2i7(message):
+    bot.send_message(message.chat.id, "💡 نصائح:\n✅ نام 7 سوايع\n✅ ما تحفظش ليلة الرعد\n✅ اشرح لصاحبك")
+
+@bot.message_handler(func=lambda m: True)
+def calc(message):
+    try:
+        nums = [float(x) for x in message.text.split() if x.replace('.','',1).isdigit()]
+        if len(nums)>=2:
+            bot.send_message(message.chat.id, f"✅ معدلك هو: {sum(nums)/len(nums):.2f}")
+    except: pass
+
+@app.route('/', methods=['POST'])
+def webhook():
+    update = telebot.types.Update.de_json(request.get_data().decode('UTF-8'))
+    bot.process_new_updates([update])
+    return 'ok', 200
 
 @app.route('/')
 def home():
     return "Bot is alive!"
 
-TOKEN = os.environ.get("BOT_TOKEN")
-bot = telebot.TeleBot(TOKEN)
-
-@bot.message_handler(commands=['start'])
-def start(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("📚 حساب المعدل", "🔍 بحث")
-    bot.send_message(message.chat.id, "مرحبا بيك في بوت dz-bot 🤖", reply_markup=markup)
-
-@bot.message_handler(func=lambda m: m.text == "📚 حساب المعدل")
-def ask_moy(message):
-    bot.send_message(message.chat.id, "ابعتلي معدلاتك: 12 14 15.5")
-    bot.register_next_step_handler(message, calc_moy)
-
-def calc_moy(message):
-    try:
-        notes = [float(x) for x in message.text.split()]
-        moy = sum(notes) / len(notes)
-        bot.send_message(message.chat.id, f"معدلك هو : {moy:.2f} ✅")
-    except:
-        bot.send_message(message.chat.id, "خطأ ❌ ابعت هكا: 12 14 13")
-
-@bot.message_handler(func=lambda m: True)
-def all_msg(message):
-    bot.send_message(message.chat.id, "اكتب /start")
-
-def run_bot():
-    print("Bot running...")
-    bot.infinity_polling()
-
-threading.Thread(target=run_bot).start()
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
