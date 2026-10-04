@@ -71,8 +71,8 @@ def index(): return "Bot V2 Live!"
 def run_bot():
     bot.remove_webhook()
     time.sleep(2)
-                     bot.infinity_polling(none_stop=True,     timeout=10, long_polling_timeout=5)
+    bot.infinity_polling(none_stop=True,timeout=10,long_polling_timeout=5)
 
 if __name__ == "__main__":
-        threading.Thread(target=run_bot).start()    
-   
+    threading.Thread(target=run_bot).start()
+    app.run(host="0.0.0.0",port=int(os.environ.get("PORT",10000)))
