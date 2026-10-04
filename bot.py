@@ -21,19 +21,22 @@ def start(m):
  bot.send_message(m.chat.id,"اهلا بيك في بوت الطالب الجزائري\nاختار من القائمة:",reply_markup=kb())
 @bot.message_handler(func=lambda m:"حساب المعدل" in m.text)
 def c1(m):
- bot.send_message(m.chat.id,"ابعتلي نقاطك هكا: 16 12 15 14")
+ bot.send_message(m.chat.id,"ابعتلي نقاطك هكا: 16 12 15 14 و نحسبلك المعدل")
 @bot.message_handler(func=lambda m:"بنك البحوث" in m.text)
 def c2(m):
- bot.send_message(m.chat.id,"بنك البحوث:\n1- الذكاء الاصطناعي\n2- التنمية المستدامة\n3- التسويق الرقمي")
+ bot.send_message(m.chat.id,"بنك البحوث:\n1- الذكاء الاصطناعي\n2- التنمية المستدامة\n3- التسويق الرقمي\nقولّي رقم البحث نبعثهولك")
 @bot.message_handler(func=lambda m:"تنظيم الوقت" in m.text)
 def c3(m):
- bot.send_message(m.chat.id,"خطة المراجعة:\nصباح حفظ\nمساء فهم\nليل مراجعة")
+ bot.send_message(m.chat.id,"خطة المراجعة:\n- صباح: حفظ\n- مساء: فهم الدروس\n- ليل: مراجعة سريعة\n\nننصحك ترقد بكري!")
+@bot.message_handler(func=lambda m:"نصائح للتفوق" in m.text)
+def c4(m):
+ bot.send_message(m.chat.id,"نصائح للتفوق:\n1- المراجعة اليومية اهم من ليلة الرعد\n2- لخص دروسك بيدك\n3- حل تمارين بزاف\n4- ابعد على التيك توك وقت المراجعة\n\nبالتوفيق!")
 @bot.message_handler(func=lambda m:True)
 def all_msg(m):
  try:
   nums=[float(x) for x in m.text.split() if x.replace('.','',1).isdigit()]
   if len(nums)>=2:
-   bot.send_message(m.chat.id,f"معدلك هو: {sum(nums)/len(nums):.2f}")
+   bot.send_message(m.chat.id,f"معدلك هو: {sum(nums)/len(nums):.2f} مبروك!")
  except:
   pass
 @app.route('/',methods=['POST'])
