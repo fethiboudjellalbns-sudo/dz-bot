@@ -36,7 +36,7 @@ def handle(msg):
 
     if "معدل" in t:
         user_state[chat_id] = "moyenne"
-        bot.send_message(chat_id, "📊 **حساب المعدل**\n\nابعثلي علاماتك مفصولة بفراغ:\nمثال: `15 14 12.5 16 13`\n\nوأنا نحسبلك المعدل فورا!")
+        bot.send_message(chat_id, "📊 **حساب المعدل**\n\nابعثلي علاماتك مفصولة بفراغ:\nمثال:`15 14 12.5 16 13`\n\nوأنا نحسبلك المعدل فورا!")
         return
 
     if chat_id in user_state and user_state[chat_id] == "moyenne":
