@@ -6,7 +6,6 @@ from telebot import types
 app = Flask(__name__)
 TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
-
 WEBHOOK_URL = "https://dz-bot-v4i9.onrender.com/"
 try:
     bot.remove_webhook()
@@ -15,14 +14,14 @@ except:
     pass
 
 def main_keyboard():
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    markup.add("حساب المعدل", "بنك البحوث")
-    markup.add("تنظيم الوقت", "نصائح للتفوق")
-    return markup
+    m = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    m.add("حساب المعدل", "بنك البحوث")
+    m.add("تنظيم الوقت", "نصائح للتفوق")
+    return m
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, "اهلا بيك في بوت الطالب الجزائري\n\nاختار من القائمة لتحت:", reply_markup=main_keyboard())
+    bot.send_message(message.chat.id, "اهلا بيك في بوت الطالب الجزائري\nاختار من القائمة:", reply_markup=main_keyboard())
 
 @bot.message_handler(func=lambda m: "حساب المعدل" in m.text)
 def mo3adal(message):
@@ -45,16 +44,15 @@ def calc(message):
     try:
         nums = [float(x) for x in message.text.split() if x.replace('.','',1).isdigit()]
         if len(nums) >= 2:
-            avg = sum(nums) / len(nums)
+            avg = sum(nums)/len(nums)
             bot.send_message(message.chat.id, f"معدلك هو: {avg:.2f}")
     except:
         pass
 
 @app.route('/', methods=['POST'])
 def webhook():
-    json_str = request.get_data().decode('UTF-8')
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
+    u = telebot.types.Update.de_json(request.get_data().decode('UTF-8'))
+    bot.process_new_updates([u])
     return 'ok', 200
 
 @app.route('/')
