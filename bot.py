@@ -74,8 +74,61 @@ def run_bot():
     def run_bot():
     bot.remove_webhook()
     time.sleep(2)
-    bot.infinity_polling(none_stop=True,timeout=10,long_polling_timeout=5)
+    import os, telebot, random
+from flask import Flask
+import threading, time
+
+TOKEN = os.environ.get("BOT_TOKEN")
+bot = telebot.TeleBot(TOKEN)
+app = Flask(__name__)
+user_state = {}
+
+try:
+    bot.remove_webhook()
+    time.sleep(1)
+except:
+    pass
+
+NASAIH = ["اقرا 30د", "حدد هدفك", "صامت", "التركيز", "اشرح الدرس"]
+
+@bot.message_handler(commands=['start'])
+def start(m):
+    kb = telebot.types.ReplyKeyboardMarkup(True)
+    kb.add("📊 حساب المعدل")
+    kb.add("💡 نصائح")
+    kb.add("⏰ وقت")
+    bot.send_message(m.chat.id, "اهلا V2 جاهز!", reply_markup=kb)
+
+@bot.message_handler(func=lambda m: True)
+def all_msg(m):
+    c = m.chat.id
+    t = m.text
+    if "معدل" in t:
+        user_state[c] = "wait"
+        bot.send_message(c, "ابعث: 15 14 12")
+        return
+    if user_state.get(c) == "wait":
+        try:
+            n = [float(x) for x in t.split()]
+            bot.send_message(c, f"معدلك {sum(n)/len(n):.2f}")
+            user_state.pop(c)
+        except:
+            bot.send_message(c, "ارقام فقط")
+        return
+    if "نصائح" in t:
+        bot.send_message(c, random.choice(NASAIH))
+    else:
+        bot.send_message(c, "اختار من تحت 👇")
+
+@app.route('/')
+def index():
+    return "Bot V2 Live!"
+
+def run_bot():
+    bot.remove_webhook()
+    time.sleep(2)
+    bot.infinity_polling(none_stop=True)
 
 if __name__ == "__main__":
     threading.Thread(target=run_bot).start()
-    app.run(host="0.0.0.0",port=int(os.environ.get("PORT",10000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
